@@ -1,0 +1,239 @@
+# INSTRUÇÕES PARA GERAR OS DIAGRAMAS
+
+Como não posso gerar arquivos PNG diretamente, você precisará criar os 3 diagramas.
+Aqui estão as instruções detalhadas:
+
+## OPÇÃO 1: Usar ChatGPT Modo Agente (RECOMENDADO)
+
+Cole este prompt no ChatGPT:
+
+```
+Preciso de 3 diagramas UML para meu projeto acadêmico SGHSS (Sistema Hospitalar).
+Gere os 3 diagramas e salve como PNG de alta qualidade (300 DPI mínimo).
+
+DIAGRAMA 1: Casos de Uso
+- Atores: Paciente, Profissional de Saúde, Administrador
+- Casos de Uso:
+  * Fazer Login (todos)
+  * Cadastrar Paciente (Admin, Profissional)
+  * Agendar Consulta (Paciente, Profissional)
+  * Cancelar Consulta (Paciente, Profissional)
+  * Registrar Prontuário (Profissional)
+  * Emitir Prescrição (Profissional)
+  * Visualizar Histórico (Paciente próprio, Profissional todos)
+  * Gerar Relatórios (Admin)
+  * Enviar Notificação (Profissional, Admin)
+- Salvar como: diagrama_casos_de_uso.png
+
+DIAGRAMA 2: Entidade-Relacionamento (DER)
+- Entidades: USUARIO, PACIENTE, PROFISSIONAL, CONSULTA, PRONTUARIO, PRESCRICAO, NOTIFICACAO, AUDITORIA
+- Relacionamentos:
+  * USUARIO (1) ←→ (0,1) PACIENTE
+  * USUARIO (1) ←→ (0,1) PROFISSIONAL  
+  * PACIENTE (1) ←→ (0,N) CONSULTA
+  * PROFISSIONAL (1) ←→ (0,N) CONSULTA
+  * CONSULTA (1) ←→ (0,N) PRONTUARIO
+  * PRONTUARIO (1) ←→ (0,N) PRESCRICAO
+  * PACIENTE (1) ←→ (0,N) NOTIFICACAO
+  * USUARIO (1) ←→ (0,N) AUDITORIA
+- Usar notação pé-de-galinha (crow's foot)
+- Salvar como: diagrama_der.png
+
+DIAGRAMA 3: Classes (Arquitetura Back-end)
+- Camadas: Controllers, Services, Repositories, Models, Middlewares
+- Classes principais:
+  * AuthController → AuthService → UsuarioRepository → Usuario (model)
+  * PacienteController → PacienteService → PacienteRepository → Paciente
+  * ConsultaController → ConsultaService → ConsultaRepository → Consulta
+  * Middlewares: AuthMiddleware, RBACMiddleware, ValidationMiddleware, AuditMiddleware
+- Mostrar relacionamentos (usa →)
+- Salvar como: diagrama_classes.png
+
+Salve os 3 arquivos PNG em:
+[caminho onde você está rodando o ChatGPT]/diagramas/
+```
+
+Depois mova os 3 arquivos PNG para a pasta `diagramas/` deste pacote.
+
+---
+
+## OPÇÃO 2: Usar ferramentas online MANUALMENTE
+
+### Para Diagrama de Casos de Uso e Classes:
+
+1. Acesse: https://app.diagrams.net/
+2. Criar novo diagrama
+3. Escolher: UML → Use Case Diagram (ou Class Diagram)
+4. Adicionar elementos conforme especificado acima
+5. Exportar como PNG (File → Export as → PNG)
+6. Configurações de exportação:
+   - DPI: 300
+   - Width: 2400px ou maior
+   - Background: White
+   - Border: 10px
+7. Salvar como diagrama_casos_de_uso.png (ou diagrama_classes.png)
+
+### Para Diagrama DER:
+
+1. Acesse: https://dbdiagram.io/
+2. Cole este código DBML:
+
+```dbml
+Table USUARIO {
+  id UUID [pk]
+  email VARCHAR(255) [unique]
+  senha_hash VARCHAR(255)
+  tipo ENUM [note: 'PACIENTE, PROFISSIONAL, ADMIN']
+  ativo BOOLEAN
+  created_at TIMESTAMP
+  updated_at TIMESTAMP
+}
+
+Table PACIENTE {
+  id UUID [pk]
+  usuario_id UUID [ref: - USUARIO.id, unique]
+  cpf_encrypted VARCHAR(512) [unique]
+  nome_completo VARCHAR(255)
+  data_nascimento DATE
+  tipo_sanguineo VARCHAR(10)
+  alergias TEXT
+  telefone VARCHAR(20)
+  endereco JSONB
+}
+
+Table PROFISSIONAL {
+  id UUID [pk]
+  usuario_id UUID [ref: - USUARIO.id, unique]
+  crm_crn VARCHAR(50) [unique]
+  especialidade VARCHAR(100)
+  disponibilidade JSONB
+}
+
+Table CONSULTA {
+  id UUID [pk]
+  paciente_id UUID [ref: > PACIENTE.id]
+  profissional_id UUID [ref: > PROFISSIONAL.id]
+  data_hora TIMESTAMP
+  tipo ENUM [note: 'PRESENCIAL, TELEMEDICINA']
+  status ENUM [note: 'AGENDADA, REALIZADA, CANCELADA']
+  motivo VARCHAR(500)
+  observacoes TEXT
+}
+
+Table PRONTUARIO {
+  id UUID [pk]
+  consulta_id UUID [ref: > CONSULTA.id]
+  profissional_id UUID [ref: > PROFISSIONAL.id]
+  data_atendimento TIMESTAMP
+  queixa_principal TEXT
+  diagnostico TEXT
+  conduta TEXT
+}
+
+Table PRESCRICAO {
+  id UUID [pk]
+  prontuario_id UUID [ref: > PRONTUARIO.id]
+  medicamento VARCHAR(255)
+  dosagem VARCHAR(100)
+  frequencia VARCHAR(100)
+  duracao VARCHAR(100)
+}
+
+Table NOTIFICACAO {
+  id UUID [pk]
+  paciente_id UUID [ref: > PACIENTE.id]
+  tipo ENUM
+  mensagem TEXT
+  lida BOOLEAN
+  enviada_em TIMESTAMP
+}
+
+Table AUDITORIA {
+  id UUID [pk]
+  usuario_id UUID [ref: > USUARIO.id]
+  acao VARCHAR(50)
+  entidade VARCHAR(100)
+  entidade_id UUID
+  dados_anteriores JSONB
+  dados_novos JSONB
+  ip_origem VARCHAR(45)
+  timestamp TIMESTAMP
+}
+```
+
+3. Clicar em "Export" → PNG
+4. Salvar como diagrama_der.png
+
+---
+
+## OPÇÃO 3: PlantUML (para usuários avançados)
+
+Se você tem PlantUML instalado ou quer usar online:
+
+### Use Case Diagram:
+```plantuml
+@startuml
+left to right direction
+actor Paciente
+actor "Profissional de Saúde" as Prof
+actor Administrador as Admin
+
+rectangle SGHSS {
+  usecase "Fazer Login" as UC1
+  usecase "Cadastrar Paciente" as UC2
+  usecase "Agendar Consulta" as UC3
+  usecase "Cancelar Consulta" as UC4
+  usecase "Registrar Prontuário" as UC5
+  usecase "Emitir Prescrição" as UC6
+  usecase "Visualizar Histórico" as UC7
+  usecase "Gerar Relatórios" as UC8
+  usecase "Enviar Notificação" as UC9
+}
+
+Paciente --> UC1
+Prof --> UC1
+Admin --> UC1
+
+Paciente --> UC3
+Prof --> UC3
+
+Paciente --> UC4
+Prof --> UC4
+
+Prof --> UC2
+Admin --> UC2
+
+Prof --> UC5
+Prof --> UC6
+Prof --> UC9
+
+Paciente --> UC7
+Prof --> UC7
+
+Admin --> UC8
+Admin --> UC9
+
+UC5 ..> UC6 : <<extend>>
+UC3 ..> UC9 : <<include>>
+@enduml
+```
+
+Acesse https://www.planttext.com/, cole o código acima e faça download do PNG.
+
+---
+
+## CHECKLIST FINAL
+
+Depois de gerar os 3 diagramas, verifique:
+
+□ diagrama_casos_de_uso.png (existe e abre)
+□ diagrama_der.png (existe e abre)
+□ diagrama_classes.png (existe e abre)
+□ Todos os PNGs têm boa resolução (>= 1920x1080)
+□ Todos os textos estão legíveis
+□ Cores profissionais (evitar cores muito vibrantes)
+□ Fundo branco ou transparente
+
+Salve os 3 arquivos PNG nesta pasta: diagramas/
+
+Pronto! Agora você pode continuar com o processo de adicionar ao GitHub.
