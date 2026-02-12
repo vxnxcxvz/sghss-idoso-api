@@ -307,31 +307,14 @@ O projeto inclui 13 casos de teste formais:
 
 ## 🎓 Projeto Acadêmico
 
-Este projeto foi desenvolvido como Trabalho de Conclusão da disciplina **Projeto Multidisciplinar** do curso de Análise e Desenvolvimento de Sistemas da UNINTER.
+ **Projeto Multidisciplinar** - Análise e Desenvolvimento de Sistemas da UNINTER.
 
 **Professor Orientador:** Prof. Winston Sen Lun Fung, Me.
 
-**Período:** 2025A1 (Fevereiro-Março 2026)
+**Período:** (Fevereiro-Março 2026)
 
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## 🤝 Contribuições
 
-Contribuições são bem-vindas! Sinta-se à vontade para:
-1. Fazer fork do projeto
-2. Criar uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abrir um Pull Request
-
-## 📞 Suporte
-
-Para dúvidas ou sugestões, abra uma [issue](https://github.com/vxnxcxvz/desenvolvimento-back-end/issues) no repositório.
-
----
-
-⭐ Se este projeto foi útil para você, considere dar uma estrela no repositório!
-
-**Desenvolvido com ❤️ para melhorar o cuidado ao idoso**
