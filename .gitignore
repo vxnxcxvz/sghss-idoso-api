@@ -1,18 +1,32 @@
-# Dependencies
+# .gitignore para Node.js + TypeScript + Prisma
+# Ignora dependências e diretórios de build
 node_modules/
-
-# Environment variables
-.env
-.env.*
-
-# Build outputs
 dist/
 build/
-
-# Logs
-logs/
+coverage/
+.prisma/
+# Logs temporários
 *.log
-
-# OS
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# Variáveis de ambiente
+.env
+.env.*
+# Arquivos do sistema operacional
 .DS_Store
 Thumbs.db
+# Configurações de IDEs/editors
+.idea/
+.vscode/
+*.code-workspace
+# Arquivos de cache
+*.tgz
+*.tmp
+# Saídas de testes
+*.spec.js
+*.spec.ts
+# Pastas de relatórios
+docs/relatorio/
+# Arquivos do Prisma gerados
+prisma/migrations/*.sql
