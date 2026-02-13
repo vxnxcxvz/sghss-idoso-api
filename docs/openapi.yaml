@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  title: SGHSS Idoso API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+  /auth/signup:
+    post:
+      summary: Criar usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome: { type: string }
+                email: { type: string }
+                senha: { type: string }
+                perfil: { type: string, enum: [ADMIN, PROFISSIONAL, PACIENTE, CUIDADOR] }
+                pacienteId: { type: integer }
+              required: [nome, email, senha]
+      responses:
+        '201': { description: Criado }
+        '409': { description: Conflito (email) }
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                senha: { type: string }
+              required: [email, senha]
+      responses:
+        '200': { description: Token }
+        '401': { description: Não autorizado }
+  /pacientes:
+    get:
+      summary: Listar pacientes (ADMIN/PROFISSIONAL)
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Criar paciente (ADMIN/PROFISSIONAL)
+      responses:
+        '201': { description: Criado }
+  /pacientes/{id}:
+    get:
+      summary: Obter paciente por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+        '403': { description: Proibido }
+        '404': { description: Não encontrado }
+    put:
+      summary: Atualizar paciente (ADMIN/PROFISSIONAL)
+      responses:
+        '200': { description: OK }
+    delete:
+      summary: Excluir paciente (ADMIN)
+      responses:
+        '204': { description: Sem conteúdo }
+  /pacientes/{id}/vinculos:
+    post:
+      summary: Vincular cuidador ao paciente (ADMIN/PROFISSIONAL)
+      responses:
+        '201': { description: Criado }
+  /consultas:
+    get:
+      summary: Listar consultas
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Agendar consulta (ADMIN/PROFISSIONAL)
+      responses:
+        '201': { description: Criado }
+        '409': { description: Conflito de agenda }
+  /consultas/{id}/cancelar:
+    patch:
+      summary: Cancelar consulta (ADMIN/PROFISSIONAL)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+        '404': { description: Não encontrado }
+  /prontuarios:
+    post:
+      summary: Criar prontuário (PROFISSIONAL)
+      responses:
+        '201': { description: Criado }
+  /prontuarios/paciente/{pacienteId}:
+    get:
+      summary: Listar prontuários por paciente
+      responses:
+        '200': { description: OK }
+  /prescricoes:
+    post:
+      summary: Criar prescrição (PROFISSIONAL)
+      responses:
+        '201': { description: Criado }
+  /prescricoes/paciente/{pacienteId}:
+    get:
+      summary: Listar prescrições por paciente
+      responses:
+        '200': { description: OK }
+  /notificacoes:
+    post:
+      summary: Criar notificação (ADMIN/PROFISSIONAL)
+      responses:
+        '201': { description: Criado }
+  /notificacoes/paciente/{pacienteId}:
+    get:
+      summary: Listar notificações por paciente
+      responses:
+        '200': { description: OK }
+  /relatorios/consultas:
+    get:
+      summary: Relatório simples de consultas (ADMIN)
+      responses:
+        '200': { description: OK }

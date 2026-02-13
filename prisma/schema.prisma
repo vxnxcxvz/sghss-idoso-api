@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Perfil {
+  ADMIN
+  PROFISSIONAL
+  PACIENTE
+  CUIDADOR
+}
+
+enum StatusConsulta {
+  AGENDADA
+  CANCELADA
+  REALIZADA
+}
+
+enum TipoNotificacao {
+  LEMBRETE
+  ORIENTACAO
+}
+
+enum CanalNotificacao {
+  APP
+  SMS
+  EMAIL
+}
+
+model Usuario {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  email       String   @unique
+  senhaHash   String   @map("senha_hash")
+  perfil      Perfil
+  pacienteId  Int?     @map("paciente_id")
+  criadoEm    DateTime @default(now()) @map("criado_em")
+
+  paciente    Paciente? @relation(fields: [pacienteId], references: [id])
+  consultas   Consulta[] @relation("ConsultasDoProfissional")
+  auditorias  Auditoria[]
+  vinculosCuidador VinculoCuidador[] @relation("VinculosPorCuidador")
+
+  @@map("usuarios")
+}
+
+model Paciente {
+  id               Int      @id @default(autoincrement())
+  nome             String
+  cpf              String   @unique
+  dataNascimento   DateTime @map("data_nascimento")
+  telefone         String?
+  endereco         String?
+  contatoEmergencia String? @map("contato_emergencia")
+  criadoEm         DateTime @default(now()) @map("criado_em")
+
+  usuarios         Usuario[]
+  consultas        Consulta[]
+  notificacoes     Notificacao[]
+  vinculos         VinculoCuidador[] @relation("VinculosPorPaciente")
+
+  @@map("pacientes")
+}
+
+model Consulta {
+  id             Int          @id @default(autoincrement())
+  pacienteId     Int          @map("paciente_id")
+  profissionalId Int          @map("profissional_id")
+  dataHora       DateTime     @map("data_hora")
+  status         StatusConsulta @default(AGENDADA)
+  motivo         String?
+  motivoCancelamento String?  @map("motivo_cancelamento")
+
+  paciente       Paciente     @relation(fields: [pacienteId], references: [id])
+  profissional   Usuario      @relation("ConsultasDoProfissional", fields: [profissionalId], references: [id])
+  prontuarios    Prontuario[]
+
+  @@index([pacienteId])
+  @@index([profissionalId])
+  @@map("consultas")
+}
+
+model Prontuario {
+  id         Int      @id @default(autoincrement())
+  consultaId Int      @map("consulta_id")
+  evolucao   String
+  sinaisVitais String? @map("sinais_vitais")
+  criadoEm   DateTime @default(now()) @map("criado_em")
+
+  consulta   Consulta @relation(fields: [consultaId], references: [id])
+  prescricoes Prescricao[]
+
+  @@index([consultaId])
+  @@map("prontuarios")
+}
+
+model Prescricao {
+  id          Int      @id @default(autoincrement())
+  prontuarioId Int     @map("prontuario_id")
+  medicamento String
+  posologia   String
+  duracaoDias Int      @map("duracao_dias")
+  observacoes String?
+
+  prontuario  Prontuario @relation(fields: [prontuarioId], references: [id])
+
+  @@index([prontuarioId])
+  @@map("prescricoes")
+}
+
+model Notificacao {
+  id        Int      @id @default(autoincrement())
+  pacienteId Int     @map("paciente_id")
+  tipo      TipoNotificacao
+  mensagem  String
+  canal     CanalNotificacao
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  paciente  Paciente @relation(fields: [pacienteId], references: [id])
+
+  @@index([pacienteId])
+  @@map("notificacoes")
+}
+
+model VinculoCuidador {
+  id         Int      @id @default(autoincrement())
+  pacienteId Int      @map("paciente_id")
+  cuidadorUserId Int  @map("cuidador_user_id")
+  grau       String?
+  criadoEm   DateTime @default(now()) @map("criado_em")
+
+  paciente   Paciente @relation("VinculosPorPaciente", fields: [pacienteId], references: [id])
+  cuidador   Usuario  @relation("VinculosPorCuidador", fields: [cuidadorUserId], references: [id])
+
+  @@unique([pacienteId, cuidadorUserId])
+  @@index([pacienteId])
+  @@index([cuidadorUserId])
+  @@map("vinculos_cuidador")
+}
+
+model Auditoria {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int?     @map("usuario_id")
+  acao      String
+  rota      String
+  recurso   String?
+  recursoId Int?     @map("recurso_id")
+  ip        String?
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([usuarioId])
+  @@map("auditoria")
+}

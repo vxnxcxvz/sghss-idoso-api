@@ -1,0 +1,158 @@
+# COMO FAZER OS 13 PRINTS DO POSTMAN
+
+Você precisa fazer 13 screenshots (prints) do Postman mostrando os testes.
+
+## PREPARAÇÃO
+
+1. Abrir o Postman
+2. Importar a collection: SGHSS_Collection.json
+   - File → Import → selecionar o arquivo JSON
+3. Garantir que sua API está rodando:
+   ```bash
+   cd desenvolvimento-back-end
+   npm run dev
+   ```
+4. Configurar variável base_url:
+   - Collections → SGHSS API → Variables
+   - base_url = http://localhost:3000
+
+---
+
+## LISTA DE PRINTS NECESSÁRIOS
+
+### CT01 - Login com sucesso ✅
+- Executar: POST /api/v1/auth/login
+- Body: email e senha corretos
+- Mostrar resposta: 200 + token JWT
+- Salvar como: CT01_login_sucesso.png
+
+### CT02 - Login senha incorreta ❌
+- Executar: POST /api/v1/auth/login
+- Body: email correto, senha errada
+- Mostrar resposta: 401 + erro
+- Salvar como: CT02_login_senha_incorreta.png
+
+### CT03 - Cadastro de usuário ✅
+- Executar: POST /api/v1/auth/register
+- Body: dados completos válidos
+- Mostrar resposta: 201 + usuário criado
+- Salvar como: CT03_register_sucesso.png
+
+### CT04 - Criar paciente válido ✅
+- Executar: POST /api/v1/pacientes
+- Header: Authorization com token
+- Body: dados de paciente válidos
+- Mostrar resposta: 201 + paciente criado
+- Salvar como: CT04_criar_paciente.png
+
+### CT05 - CPF duplicado ❌
+- Executar: POST /api/v1/pacientes
+- Body: CPF que já existe
+- Mostrar resposta: 409 + erro de conflito
+- Salvar como: CT05_paciente_cpf_duplicado.png
+
+### CT06 - Listar pacientes ✅
+- Executar: GET /api/v1/pacientes?page=1&limit=10
+- Header: Authorization
+- Mostrar resposta: 200 + array de pacientes
+- Salvar como: CT06_listar_pacientes.png
+
+### CT07 - Agendar consulta ✅
+- Executar: POST /api/v1/consultas
+- Body: pacienteId, profissionalId, dataHora futuro
+- Mostrar resposta: 201 + consulta agendada
+- Salvar como: CT07_agendar_consulta.png
+
+### CT08 - Conflito de horário ❌
+- Executar: POST /api/v1/consultas
+- Body: mesmo profissional, mesmo horário de CT07
+- Mostrar resposta: 409 + erro de conflito
+- Salvar como: CT08_conflito_horario.png
+
+### CT09 - Cancelar consulta ✅
+- Executar: PATCH /api/v1/consultas/:id/cancelar
+- Body: motivo do cancelamento
+- Mostrar resposta: 200 + consulta cancelada
+- Salvar como: CT09_cancelar_consulta.png
+
+### CT10 - Sem autenticação ❌
+- Executar: GET /api/v1/pacientes
+- SEM Header Authorization
+- Mostrar resposta: 401 + erro unauthorized
+- Salvar como: CT10_sem_token.png
+
+### CT11 - RBAC negado ❌
+- Executar: DELETE /api/v1/pacientes/:id
+- Com token de PROFISSIONAL (não admin)
+- Mostrar resposta: 403 + erro forbidden
+- Salvar como: CT11_rbac_negado.png
+
+### CT12 - Registrar prontuário ✅
+- Executar: POST /api/v1/prontuarios
+- Body: consultaId, queixa, diagnóstico, conduta
+- Mostrar resposta: 201 + prontuário criado
+- Salvar como: CT12_criar_prontuario.png
+
+### CT13 - Emitir prescrição ✅
+- Executar: POST /api/v1/prescricoes
+- Body: prontuarioId, medicamento, dosagem, frequência
+- Mostrar resposta: 201 + prescrição criada
+- Salvar como: CT13_emitir_prescricao.png
+
+---
+
+## COMO FAZER UM PRINT DE QUALIDADE
+
+Para cada teste:
+
+1. Executar a requisição no Postman
+2. Aguardar resposta
+3. Garantir que está visível:
+   ✓ Nome da requisição (ex: "CT01 - Login sucesso")
+   ✓ Método HTTP (POST, GET, etc)
+   ✓ URL completa
+   ✓ Headers (principalmente Authorization se usado)
+   ✓ Body da requisição (JSON formatado)
+   ✓ Status code da resposta (200, 201, 401, etc)
+   ✓ Body da resposta (JSON formatado)
+4. Tirar screenshot:
+   - Windows: Windows + Shift + S
+   - Mac: Cmd + Shift + 4
+   - Linux: Shift + Print Screen
+5. Salvar com o nome exato (ex: CT01_login_sucesso.png)
+
+---
+
+## DICAS
+
+- Use zoom 100% no Postman para melhor legibilidade
+- Capture tela inteira da requisição/resposta
+- Verifique se JSON está formatado (botão "Pretty")
+- Confirme que o nome do arquivo está correto
+- Todos os PNGs devem estar na pasta postman/
+
+---
+
+## CHECKLIST FINAL
+
+Depois de fazer todos os prints, verifique:
+
+□ CT01_login_sucesso.png (existe)
+□ CT02_login_senha_incorreta.png (existe)
+□ CT03_register_sucesso.png (existe)
+□ CT04_criar_paciente.png (existe)
+□ CT05_paciente_cpf_duplicado.png (existe)
+□ CT06_listar_pacientes.png (existe)
+□ CT07_agendar_consulta.png (existe)
+□ CT08_conflito_horario.png (existe)
+□ CT09_cancelar_consulta.png (existe)
+□ CT10_sem_token.png (existe)
+□ CT11_rbac_negado.png (existe)
+□ CT12_criar_prontuario.png (existe)
+□ CT13_emitir_prescricao.png (existe)
+
+Total: 13 arquivos PNG
+
+Salve todos na pasta: postman/
+
+Pronto para adicionar ao GitHub!

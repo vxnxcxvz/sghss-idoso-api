@@ -1,0 +1,30 @@
+{
+	"info": {
+		"_postman_id": "sghss-2026-collection",
+		"name": "SGHSS API - Sistema Gestão Hospitalar",
+		"description": "Collection completa da API SGHSS\n\nProjeto: Multidisciplinar UNINTER 2026\nAluno: Vinícius Capacci (RU: 4389297)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Autenticação",
+			"item": [
+				{
+					"name": "CT01 - Login sucesso",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"email\":\"paciente@email.com\",\"senha\":\"Senha@123\"}"
+						},
+						"url": {"raw": "{{base_url}}/api/v1/auth/login"}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{"key": "base_url", "value": "http://localhost:3000"}
+	]
+}
