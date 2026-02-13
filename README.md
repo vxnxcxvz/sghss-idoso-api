@@ -1,4 +1,4 @@
-# 🏥 Plataforma Web de Suporte ao Cuidado do Idoso - API REST
+Plataforma Web de Suporte ao Cuidado do Idoso - API REST
 
 ![Node.js](https://img.shields.io/badge/Node.js-20.x-green)
 ![Express](https://img.shields.io/badge/Express-4.18-blue)
@@ -9,7 +9,7 @@
 
 API REST completa para gestão do cuidado ao idoso, integrável ao Sistema de Gestão Hospitalar e de Serviços de Saúde (SGHSS) da instituição VidaPlus.
 
-## 📋 Sobre o Projeto
+## Sobre o Projeto
 
 Este projeto implementa o back-end de uma plataforma web focada no suporte ao cuidado do idoso, contemplando:
 
@@ -24,7 +24,7 @@ Este projeto implementa o back-end de uma plataforma web focada no suporte ao cu
 - ✅ Auditoria de ações sensíveis (compliance LGPD)
 - ✅ Logs estruturados com Winston
 
-## 🚀 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 ### Core
 - **Node.js** v20.11.0 LTS - Runtime JavaScript
@@ -48,7 +48,7 @@ Este projeto implementa o back-end de uma plataforma web focada no suporte ao cu
 - **nodemon** v3.0.2 - Hot reload
 - **Postman** v10.20.0 - Testes de API
 
-## 📦 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 desenvolvimento-back-end/
@@ -140,7 +140,7 @@ npm start
 
 O servidor estará rodando em `http://localhost:3000`
 
-## 📚 Documentação da API
+## Documentação da API
 
 ### Swagger/OpenAPI
 
@@ -189,7 +189,7 @@ docs/postman_collection.json
 #### Relatórios
 - `GET /relatorios/consultas` - Relatório de consultas (ADMIN only)
 
-## 🔐 Autenticação e Autorização
+## Autenticação e Autorização
 
 ### JWT (JSON Web Token)
 
