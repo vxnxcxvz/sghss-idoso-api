@@ -267,53 +267,7 @@ O projeto inclui 13 casos de teste formais:
                      └──────────────┘
 ```
 
-## 🔒 Segurança e Compliance
 
-### LGPD (Lei Geral de Proteção de Dados)
-
-- ✅ Minimização de dados (apenas campos necessários)
-- ✅ Hash bcrypt de senhas (salt rounds = 10)
-- ✅ Auditoria de ações sensíveis (prontuários, prescrições)
-- ✅ Logs estruturados com requestId
-- ✅ Soft delete (preparado para direito ao esquecimento)
-
-### Boas Práticas de Segurança
-
-- ✅ Validação rigorosa com Zod
-- ✅ Prepared statements via Prisma (proteção SQL Injection)
-- ✅ JWT com expiração de 1 hora
-- ✅ RBAC para controle de acesso granular
-- ✅ Mensagens de erro genéricas (não expõem detalhes internos)
-
-## 🚧 Melhorias Futuras
-
-- [ ] Implementar rate limiting (proteção contra força bruta)
-- [ ] Adicionar criptografia de campos sensíveis em repouso
-- [ ] Implementar cache com Redis
-- [ ] Criar suite de testes automatizados (Jest + Supertest)
-- [ ] Configurar CI/CD pipeline (GitHub Actions)
-- [ ] Deploy em cloud (AWS/Azure/GCP)
-- [ ] Integração com plataforma de videochamada (telemedicina completa)
-- [ ] Integração com dispositivos IoT (wearables)
-- [ ] Machine Learning para predição de riscos de saúde
-
-## 👤 Autor
-
-**Vinícius Pereira Capacci**
-- RU: 4389297
-- Curso: Análise e Desenvolvimento de Sistemas
-- Instituição: UNINTER - Polo Santo André
-- GitHub: [@vxnxcxvz](https://github.com/vxnxcxvz)
-
-## 🎓 Projeto Acadêmico
-
- **Projeto Multidisciplinar** - Análise e Desenvolvimento de Sistemas da UNINTER.
-
-**Professor Orientador:** Prof. Winston Sen Lun Fung, Me.
-
-**Período:** (Fevereiro-Março 2026)
-
-## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
