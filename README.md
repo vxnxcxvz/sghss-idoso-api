@@ -232,7 +232,7 @@ O projeto inclui 13 casos de teste formais:
 - CT12: Acesso sem token
 - CT13: RBAC bloqueio
 
-## 📊 Diagrama de Arquitetura
+## Diagrama de Arquitetura
 
 ```
 ┌─────────────┐
