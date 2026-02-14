@@ -31,9 +31,7 @@ try {
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(doc));
 } catch (e) {
   // Se o YAML não carregar, não derruba a API
-}
-
-papp.use('/auth', authLegacyRoutes);
+}ap.use('/auth', authLegacyRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/pacientes', pacientesRoutes);
 app.use('/api/pacientes', pacientesRoutes);
