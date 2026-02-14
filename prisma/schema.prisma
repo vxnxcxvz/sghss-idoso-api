@@ -156,4 +156,76 @@ model Auditoria {
 
   @@index([usuarioId])
   @@map("auditoria")
+
+
+// Enum de tipos de usuario (RBAC)
+enum UserType {
+  PACIENTE
+  MEDICO
+  ENFERMEIRO
+  ADMINISTRADOR
 }
+
+// Model User - Autenticacao
+model User {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  senha     String   // Hash bcrypt
+  cpf       String?  @unique
+  tipo      UserType @default(PACIENTE)
+
+  // Campos especificos para medicos
+  crm           String?
+  especialidade String?
+
+  // Controle
+  ativo        Boolean   @default(true)
+  criadoEm     DateTime  @default(now())
+  atualizadoEm DateTime  @updatedAt
+  ultimoAcesso DateTime?
+
+  // Relacoes
+  logs          LogAuditoria[]
+
+  @@index([email])
+  @@index([cpf])
+  @@index([tipo])
+  @@map("users")
+}
+
+// Logs de Auditoria (LGPD Compliance)
+model LogAuditoria {
+  id          String   @id @default(uuid())
+  userId      String?
+
+  acao        String   // LOGIN, LOGOUT, CRIACAO, ATUALIZACAO, EXCLUSAO, ACESSO
+  descricao   String?
+  ipAddress   String?
+  userAgent   String?
+
+  dataHora    DateTime @default(now())
+
+  // Relacao com User (se existir)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([acao])
+  @@index([dataHora])
+  @@map("logs_auditoria")
+}
+
+// Tokens JWT revogados (logout)
+model TokenRevogado {
+  id          String   @id @default(uuid())
+  token       String
+  userId      String?
+
+  revogadoEm  DateTime @default(now())
+  expiraEm    DateTime
+
+  @@index([userId])
+  @@index([token])
+  @@map("tokens_revogados")
+}
+

@@ -7,6 +7,7 @@ const swaggerUi = require('swagger-ui-express');
 
 const { errorHandler } = require('./middlewares/error');
 
+const authLegacyRoutes = require('./routes/auth.legacy.routes');
 const authRoutes = require('./routes/auth.routes');
 const pacientesRoutes = require('./routes/pacientes.routes');
 const consultasRoutes = require('./routes/consultas.routes');
@@ -32,8 +33,10 @@ try {
   // Se o YAML não carregar, não derruba a API
 }
 
-app.use('/auth', authRoutes);
+papp.use('/auth', authLegacyRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/pacientes', pacientesRoutes);
+app.use('/api/pacientes', pacientesRoutes);
 app.use('/consultas', consultasRoutes);
 app.use('/prontuarios', prontuariosRoutes);
 app.use('/prescricoes', prescricoesRoutes);
