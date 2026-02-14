@@ -7,9 +7,9 @@ const swaggerUi = require('swagger-ui-express');
 
 const { errorHandler } = require('./middlewares/error');
 
-conconst authLegacyRoutes = require('./routes/auth.legacy.routes');
+const authLegacyRoutes = require('./routes/auth.legacy.routes');
 const authRoutes = require('./routes/auth.routes');
-const pacientesRoutes = require('./routes/pacientes.routes');
+st pacientesRoutes = require('./routes/pacientes.routes');
 const consultasRoutes = require('./routes/consultas.routes');
 const prontuariosRoutes = require('./routes/prontuarios.routes');
 const prescricoesRoutes = require('./routes/prescricoes.routes');
