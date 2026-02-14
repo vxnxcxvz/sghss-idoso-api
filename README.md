@@ -1,13 +1,16 @@
-# SGHSS VidaPlus — Desenvolvimento Back-end (API REST)
+# SGHSS VidaPlus — Desenvolvimento Back-end
 
-API REST para Plataforma de Suporte ao Cuidado do Idoso (SGHSS VidaPlus), com **Node.js + Express + Prisma + PostgreSQL**, **JWT**, **RBAC** e **auditoria (LGPD)**.
+API REST do SGHSS VidaPlus (Node.js + Express + Prisma + PostgreSQL), com autenticação JWT e documentação Swagger.
 
-## Como rodar
+## Requisitos
+- Node.js >= 18
+- PostgreSQL
 
+## Rodar o projeto
 ```bash
 npm install
 cp .env.example .env
-# ajuste DATABASE_URL e JWT_SECRET
+# edite DATABASE_URL e JWT_SECRET
 npx prisma generate
 npx prisma migrate dev
 npm run dev
@@ -19,6 +22,20 @@ Health: GET http://localhost:3000/health
 
 Swagger UI: http://localhost:3000/docs
 
-Postman
+Auth
 
-Importe: docs/postman_collection.json
+POST /api/auth/register
+
+POST /api/auth/login
+
+GET /api/auth/me
+
+Documentos
+
+OpenAPI: docs/openapi.yaml
+
+Postman: docs/postman_collection.json
+
+Diagramas: docs/diagramas/
+
+Evidências: docs/screenshots/
