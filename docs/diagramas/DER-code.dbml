@@ -1,17 +1,15 @@
-// SGHSS VidaPlus - DER (código DBML)
-// Gere a imagem em: https://dbdiagram.io/
-
+// SGHSS VidaPlus - DER (DBML) - modo seguro
+// Gere imagem em: https://dbdiagram.io/
 Table Usuario {
-  id int [pk, increment] // ajuste se seu Prisma usar UUID
+  id int [pk, increment]
   nome varchar
   email varchar [unique]
   senhaHash varchar
-  perfil varchar // ADMIN | PROFISSIONAL | PACIENTE | CUIDADOR
-  pacienteId int [null]  // ajuste conforme schema
+  perfil varchar
+  pacienteId int [null]
   createdAt timestamp
   updatedAt timestamp
 }
-
 Table Paciente {
   id int [pk, increment]
   nome varchar
@@ -23,18 +21,4 @@ Table Paciente {
   createdAt timestamp
   updatedAt timestamp
 }
-
-Table Consulta {
-  id int [pk, increment]
-  pacienteId int
-  profissionalId int
-  dataHora timestamp
-  tipo varchar
-  status varchar
-  createdAt timestamp
-  updatedAt timestamp
-}
-
 Ref: Usuario.pacienteId > Paciente.id
-Ref: Consulta.pacienteId > Paciente.id
-Ref: Consulta.profissionalId > Usuario.id
