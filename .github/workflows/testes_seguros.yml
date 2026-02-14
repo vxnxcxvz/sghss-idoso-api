@@ -1,0 +1,57 @@
+name: Testes Seguros
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_DB: sghss_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/sghss_test?schema=public"
+      JWT_SECRET: "supersecretkeysupersecretkeysupersecret"
+      JWT_EXPIRES_IN: "1h"
+      BCRYPT_SALT_ROUNDS: "10"
+      PORT: "3000"
+      NODE_ENV: "test"
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm install
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      - name: Migrate Database
+        run: npx prisma migrate dev --name init --skip-generate
+      - name: Run safe tests script
+        run: |
+          chmod +x testes_seguros.sh
+          ./testes_seguros.sh
+      - name: Commit evidences
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add docs/evidencias docs/RELATORIO-TESTES.md || true
+          git commit -m "ci: add evidences from workflow run" || true
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
