@@ -1,146 +1,197 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  title: SGHSS Idoso API
+  title: SGHSS API
+  description: Sistema de Gestão Hospitalar e de Serviços de Saúde
   version: 1.0.0
+  contact:
+    name: Vinícius Pereira Carvalho
+    email: contato@sghss.com
+
 servers:
   - url: http://localhost:3000
+    description: Servidor de desenvolvimento
+
+tags:
+  - name: Autenticação
+    description: Endpoints de autenticação e autorização
+  - name: Pacientes
+    description: Gestão de pacientes
+  - name: Consultas
+    description: Agendamento e gestão de consultas
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-security:
-  - bearerAuth: []
+  
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        tipo:
+          type: string
+          enum: [PACIENTE, MEDICO, ENFERMEIRO, ADMINISTRADOR]
+    
+    Error:
+      type: object
+      properties:
+        erro:
+          type: string
+        mensagem:
+          type: string
+
 paths:
-  /health:
-    get:
-      summary: Health check
+  /api/auth/register:
+    post:
+      tags:
+        - Autenticação
+      summary: Registrar novo usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nome
+                - email
+                - senha
+              properties:
+                nome:
+                  type: string
+                  example: Maria Silva
+                email:
+                  type: string
+                  format: email
+                  example: maria@teste.com
+                senha:
+                  type: string
+                  minLength: 6
+                  example: senha123
+                tipo:
+                  type: string
+                  enum: [PACIENTE, MEDICO, ENFERMEIRO, ADMINISTRADOR]
+                  default: PACIENTE
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensagem:
+                    type: string
+                  usuario:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Campos obrigatórios não preenchidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Email já cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /api/auth/login:
+    post:
+      tags:
+        - Autenticação
+      summary: Fazer login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - senha
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: maria@teste.com
+                senha:
+                  type: string
+                  example: senha123
       responses:
         '200':
-          description: OK
-  /auth/signup:
-    post:
-      summary: Criar usuário
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                nome: { type: string }
-                email: { type: string }
-                senha: { type: string }
-                perfil: { type: string, enum: [ADMIN, PROFISSIONAL, PACIENTE, CUIDADOR] }
-                pacienteId: { type: integer }
-              required: [nome, email, senha]
-      responses:
-        '201': { description: Criado }
-        '409': { description: Conflito (email) }
-  /auth/login:
-    post:
-      summary: Login
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email: { type: string }
-                senha: { type: string }
-              required: [email, senha]
-      responses:
-        '200': { description: Token }
-        '401': { description: Não autorizado }
-  /pacientes:
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensagem:
+                    type: string
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /api/auth/me:
     get:
-      summary: Listar pacientes (ADMIN/PROFISSIONAL)
+      tags:
+        - Autenticação
+      summary: Obter dados do usuário logado
+      security:
+        - bearerAuth: []
       responses:
-        '200': { description: OK }
-    post:
-      summary: Criar paciente (ADMIN/PROFISSIONAL)
-      responses:
-        '201': { description: Criado }
-  /pacientes/{id}:
+        '200':
+          description: Dados do usuário
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usuario:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Token não fornecido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /api/pacientes:
     get:
-      summary: Obter paciente por ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: integer }
+      tags:
+        - Pacientes
+      summary: Listar pacientes
+      security:
+        - bearerAuth: []
       responses:
-        '200': { description: OK }
-        '403': { description: Proibido }
-        '404': { description: Não encontrado }
-    put:
-      summary: Atualizar paciente (ADMIN/PROFISSIONAL)
-      responses:
-        '200': { description: OK }
-    delete:
-      summary: Excluir paciente (ADMIN)
-      responses:
-        '204': { description: Sem conteúdo }
-  /pacientes/{id}/vinculos:
-    post:
-      summary: Vincular cuidador ao paciente (ADMIN/PROFISSIONAL)
-      responses:
-        '201': { description: Criado }
-  /consultas:
-    get:
-      summary: Listar consultas
-      responses:
-        '200': { description: OK }
-    post:
-      summary: Agendar consulta (ADMIN/PROFISSIONAL)
-      responses:
-        '201': { description: Criado }
-        '409': { description: Conflito de agenda }
-  /consultas/{id}/cancelar:
-    patch:
-      summary: Cancelar consulta (ADMIN/PROFISSIONAL)
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: integer }
-      responses:
-        '200': { description: OK }
-        '404': { description: Não encontrado }
-  /prontuarios:
-    post:
-      summary: Criar prontuário (PROFISSIONAL)
-      responses:
-        '201': { description: Criado }
-  /prontuarios/paciente/{pacienteId}:
-    get:
-      summary: Listar prontuários por paciente
-      responses:
-        '200': { description: OK }
-  /prescricoes:
-    post:
-      summary: Criar prescrição (PROFISSIONAL)
-      responses:
-        '201': { description: Criado }
-  /prescricoes/paciente/{pacienteId}:
-    get:
-      summary: Listar prescrições por paciente
-      responses:
-        '200': { description: OK }
-  /notificacoes:
-    post:
-      summary: Criar notificação (ADMIN/PROFISSIONAL)
-      responses:
-        '201': { description: Criado }
-  /notificacoes/paciente/{pacienteId}:
-    get:
-      summary: Listar notificações por paciente
-      responses:
-        '200': { description: OK }
-  /relatorios/consultas:
-    get:
-      summary: Relatório simples de consultas (ADMIN)
-      responses:
-        '200': { description: OK }
+        '200':
+          description: Lista de pacientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

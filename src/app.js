@@ -33,7 +33,7 @@ try {
   // Se o YAML não carregar, não derruba a API
 }
 
-papp.use('/auth', authLegacyRoutes);
+app.use('/auth', authLegacyRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/pacientes', pacientesRoutes);
 app.use('/api/pacientes', pacientesRoutes);

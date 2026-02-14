@@ -1,3 +1,100 @@
+# 🏥 SGHSS - Sistema de Gestão Hospitalar
+
+Sistema de back-end para gestão hospitalar desenvolvido com Node.js, Express e Prisma.
+
+## 🚀 Tecnologias
+
+- **Node.js** 18+
+- **Express** 4.x
+- **Prisma** ORM
+- **PostgreSQL**
+- **JWT** para autenticação
+- **bcrypt** para senhas
+
+## 📦 Instalação
+
+```
+bash
+# Clonar repositório
+git clone https://github.com/vxnxcxvz/desenvolvimento-back-end.git
+cd desenvolvimento-back-end
+
+# Instalar dependências
+npm install
+
+# Configurar variáveis de ambiente
+cp .env.example .env
+# Editar .env com suas credenciais
+
+# Executar migrações
+npx prisma migrate dev
+
+# Gerar Prisma Client
+npx prisma generate
+
+# Iniciar servidor
+npm run dev
+```
+
+## 🔐 Autenticação
+
+O sistema usa JWT para autenticação. Endpoints protegidos requerem header:
+```
+Authorization: Bearer {token}
+```
+
+## 📚 Documentação
+
+- **Swagger UI:** http://localhost:3000/docs
+- **Postman Collection:** `docs/postman_collection.json`
+- **OpenAPI Spec:** `docs/openapi.yaml`
+
+## 🧪 Testes
+
+Importar `docs/postman_collection.json` no Postman e executar os casos de teste.
+
+## 📋 Endpoints Principais
+
+### Autenticação
+- POST `/api/auth/register` - Registrar usuário
+- POST `/api/auth/login` - Fazer login
+- GET `/api/auth/me` - Dados do usuário logado
+
+### Pacientes
+- GET `/api/pacientes` - Listar pacientes (autenticado)
+- GET `/api/pacientes/:id` - Buscar paciente
+- POST `/api/pacientes` - Criar paciente (admin)
+- PUT `/api/pacientes/:id` - Atualizar paciente
+- DELETE `/api/pacientes/:id` - Excluir paciente (admin)
+
+### Consultas
+- GET `/api/consultas` - Listar consultas
+- POST `/api/consultas` - Agendar consulta
+- PUT `/api/consultas/:id` - Atualizar consulta
+- DELETE `/api/consultas/:id` - Cancelar consulta
+
+## 🔒 Segurança
+
+- ✅ Autenticação JWT
+- ✅ Senhas com hash bcrypt
+- ✅ RBAC (controle de acesso por perfil)
+- ✅ Logs de auditoria (LGPD)
+- ✅ Validação de entrada com Zod
+
+## 💳 LGPD Compliance
+
+Todas as ações são registradas em `logs_auditoria` incluindo:
+- LOGIN/LOGOUT
+- CRIACAO/ATUALIZACAO/EXCLUSAO
+- ACESSO a dados sensíveis
+
+## 👨‍🎓 Autor
+
+Vinícius Pereira Carvalho
+
+## 📄 Licença
+
+MIT
 Plataforma Web de Suporte ao Cuidado do Idoso - API REST
 
 ![Node.js](https://img.shields.io/badge/Node.js-20.x-green)
