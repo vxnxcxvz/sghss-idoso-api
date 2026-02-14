@@ -6,8 +6,7 @@
   },
   "variable": [
     { "key": "base_url", "value": "http://localhost:3000", "type": "string" },
-    { "key": "token", "value": "", "type": "string" },
-    { "key": "cpf", "value": "", "type": "string" }
+    { "key": "token", "value": "", "type": "string" }
   ],
   "item": [
     {
@@ -20,7 +19,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n \"nome\": \"Admin Teste\",\n \"email\": \"admin@teste.com\",\n \"senha\": \"senha123\",\n \"tipo\": \"ADMINISTRADOR\"\n}"
+              "raw": "{\n  \"nome\": \"Admin Teste\",\n  \"email\": \"admin@teste.com\",\n  \"senha\": \"senha123\",\n  \"tipo\": \"ADMINISTRADOR\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/register",
@@ -34,7 +33,7 @@
               "script": {
                 "exec": [
                   "pm.test('Status 201 (ou 409 se já existir)', function () {",
-                  " pm.expect([201,409]).to.include(pm.response.code);",
+                  "  pm.expect([201,409]).to.include(pm.response.code);",
                   "});"
                 ]
               }
@@ -46,10 +45,7 @@
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n \"email\": \"admin@teste.com\",\n \"senha\": \"senha123\"\n}"
-            },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@teste.com\",\n  \"senha\": \"senha123\"\n}" },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
               "host": ["{{base_url}}"],
@@ -63,9 +59,9 @@
                 "exec": [
                   "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
                   "pm.test('Token presente', function () {",
-                  " var json = pm.response.json();",
-                  " pm.expect(json.token).to.exist;",
-                  " pm.collectionVariables.set('token', json.token);",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.token).to.exist;",
+                  "  pm.collectionVariables.set('token', json.token);",
                   "});"
                 ]
               }
@@ -86,9 +82,73 @@
           "event": [
             {
               "listen": "test",
-              "script": {
-                "exec": ["pm.test('Status 200', function () { pm.response.to.have.status(200); });"]
-              }
+              "script": { "exec": ["pm.test('Status 200', function () { pm.response.to.have.status(200); });"] }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pacientes",
+      "item": [
+        {
+          "name": "CT04 - Listar pacientes (com token)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/pacientes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pacientes"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Status 200', function () { pm.response.to.have.status(200); });"] }
+            }
+          ]
+        },
+        {
+          "name": "CT05 - Criar paciente (com token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Paciente Teste\",\n  \"cpf\": \"{{$randomInt}}{{$randomInt}}{{$randomInt}}{{$randomInt}}{{$randomInt}}{{$randomInt}}{{$randomInt}}{{$randomInt}}{{$randomInt}}{{$randomInt}}{{$randomInt}}\",\n  \"dataNascimento\": \"1950-01-01\",\n  \"telefone\": \"11999999999\",\n  \"endereco\": \"Rua Teste, 123\",\n  \"contatoEmergencia\": \"11988888888\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/pacientes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pacientes"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Status 201', function () { pm.response.to.have.status(201); });"] }
+            }
+          ]
+        },
+        {
+          "name": "CT06 - Acesso sem token (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/pacientes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pacientes"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Status 401', function () { pm.response.to.have.status(401); });"] }
             }
           ]
         }

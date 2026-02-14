@@ -2,14 +2,14 @@ openapi: 3.0.3
 info:
   title: SGHSS VidaPlus API
   version: 1.0.0
-  description: API REST para Plataforma de Suporte ao Cuidado do Idoso (SGHSS VidaPlus).
+  description: API REST do SGHSS VidaPlus (escopo entregue: Auth + Pacientes).
 servers:
   - url: http://localhost:3000
 tags:
   - name: Auth
     description: Autenticação e autorização (JWT)
   - name: Pacientes
-    description: CRUD de pacientes (RBAC + auditoria)
+    description: Operações de pacientes (rotas protegidas por token)
 components:
   securitySchemes:
     bearerAuth:
@@ -20,47 +20,93 @@ components:
     Error:
       type: object
       properties:
-        error: { type: string }
-        message: { type: string }
+        error: { type: string, example: "UNAUTHORIZED" }
+        message: { type: string, example: "Credenciais inválidas" }
+
     Usuario:
       type: object
       properties:
         id: { type: integer, example: 1 }
-        nome: { type: string, example: Maria Silva }
-        email: { type: string, format: email, example: maria@teste.com }
+        nome: { type: string, example: "Admin Teste" }
+        email: { type: string, format: email, example: "admin@teste.com" }
         perfil:
           type: string
           enum: [ADMIN, PROFISSIONAL, PACIENTE, CUIDADOR]
           example: ADMIN
         pacienteId: { type: integer, nullable: true, example: null }
+
     RegisterRequest:
       type: object
       required: [nome, email, senha]
       properties:
-        nome: { type: string }
-        email: { type: string, format: email }
-        senha: { type: string, minLength: 6 }
+        nome: { type: string, example: "Admin Teste" }
+        email: { type: string, format: email, example: "admin@teste.com" }
+        senha: { type: string, minLength: 6, example: "senha123" }
         tipo:
           type: string
           enum: [PACIENTE, MEDICO, ENFERMEIRO, ADMINISTRADOR]
-          default: ADMINISTRADOR
+          description: Compatibilidade (mapeia para perfil).
+          example: "ADMINISTRADOR"
         perfil:
           type: string
           enum: [ADMIN, PROFISSIONAL, PACIENTE, CUIDADOR]
-        pacienteId: { type: integer, nullable: true }
+          description: Perfil direto (se informado, tem prioridade).
+          example: "ADMIN"
+        pacienteId:
+          type: integer
+          nullable: true
+          example: null
+
     LoginRequest:
       type: object
       required: [email, senha]
       properties:
-        email: { type: string, format: email }
-        senha: { type: string }
+        email: { type: string, format: email, example: "admin@teste.com" }
+        senha: { type: string, example: "senha123" }
+
     LoginResponse:
       type: object
       properties:
-        message: { type: string }
-        token: { type: string }
-        expiresIn: { type: string }
+        message: { type: string, example: "Login realizado com sucesso" }
+        token: { type: string, example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+        expiresIn: { type: string, example: "1h" }
+
+    Paciente:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        nome: { type: string, example: "Maria Santos" }
+        cpf: { type: string, example: "12345678900" }
+        dataNascimento: { type: string, example: "1945-03-15" }
+        telefone: { type: string, nullable: true, example: "(11) 98765-4321" }
+        endereco: { type: string, nullable: true, example: "Rua das Flores, 123" }
+        contatoEmergencia: { type: string, nullable: true, example: "(11) 91234-5678" }
+
+    CreatePacienteRequest:
+      type: object
+      required: [nome, cpf, dataNascimento]
+      properties:
+        nome: { type: string, example: "Maria Santos" }
+        cpf: { type: string, example: "12345678900" }
+        dataNascimento: { type: string, example: "1945-03-15" }
+        telefone: { type: string, example: "(11) 98765-4321" }
+        endereco: { type: string, example: "Rua das Flores, 123" }
+        contatoEmergencia: { type: string, example: "(11) 91234-5678" }
+
 paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "ok" }
+
   /api/auth/register:
     post:
       tags: [Auth]
@@ -85,6 +131,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
+
   /api/auth/login:
     post:
       tags: [Auth]
@@ -105,10 +152,11 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
+
   /api/auth/me:
     get:
       tags: [Auth]
-      summary: Retorna dados do usuário logado
+      summary: Dados do usuário logado
       security: [{ bearerAuth: [] }]
       responses:
         '200':
@@ -121,6 +169,51 @@ paths:
                   usuario: { $ref: '#/components/schemas/Usuario' }
         '401':
           description: Token ausente/ inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/pacientes:
+    get:
+      tags: [Pacientes]
+      summary: Listar pacientes (rota protegida)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Lista de pacientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Paciente' }
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+    post:
+      tags: [Pacientes]
+      summary: Criar paciente (rota protegida)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreatePacienteRequest' }
+      responses:
+        '201':
+          description: Paciente criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Paciente' }
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: Não autenticado
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
