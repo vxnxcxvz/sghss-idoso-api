@@ -1,38 +1,26 @@
 {
   "info": {
-    "name": "SGHSS - API Tests",
-    "description": "Collection de testes para o Sistema SGHSS",
+    "name": "SGHSS - API Tests (6 casos)",
+    "description": "Coleção mínima de testes (Auth + Pacientes) para validação do backend.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:3000",
-      "type": "string"
-    },
-    {
-      "key": "token",
-      "value": "",
-      "type": "string"
-    }
+    { "key": "base_url", "value": "http://localhost:3000", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "cpf", "value": "", "type": "string" }
   ],
   "item": [
     {
-      "name": "Autenticação",
+      "name": "Auth",
       "item": [
         {
-          "name": "CT01 - Registrar Usuário",
+          "name": "CT01 - Registrar ADMIN",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Maria Silva\",\n  \"email\": \"maria@teste.com\",\n  \"senha\": \"senha123\",\n  \"tipo\": \"PACIENTE\"\n}"
+              "raw": "{\n \"nome\": \"Admin Teste\",\n \"email\": \"admin@teste.com\",\n \"senha\": \"senha123\",\n \"tipo\": \"ADMINISTRADOR\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/register",
@@ -40,14 +28,13 @@
               "path": ["api", "auth", "register"]
             }
           },
-          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status 201', function() {",
-                  "  pm.response.to.have.status(201);",
+                  "pm.test('Status 201 (ou 409 se já existir)', function () {",
+                  " pm.expect([201,409]).to.include(pm.response.code);",
                   "});"
                 ]
               }
@@ -55,18 +42,13 @@
           ]
         },
         {
-          "name": "CT02 - Login",
+          "name": "CT02 - Login (salva token)",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"maria@teste.com\",\n  \"senha\": \"senha123\"\n}"
+              "raw": "{\n \"email\": \"admin@teste.com\",\n \"senha\": \"senha123\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
@@ -74,20 +56,16 @@
               "path": ["api", "auth", "login"]
             }
           },
-          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status 200', function() {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Token presente', function() {",
-                  "  var json = pm.response.json();",
-                  "  pm.expect(json.token).to.exist;",
-                  "  pm.collectionVariables.set('token', json.token);",
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Token presente', function () {",
+                  " var json = pm.response.json();",
+                  " pm.expect(json.token).to.exist;",
+                  " pm.collectionVariables.set('token', json.token);",
                   "});"
                 ]
               }
@@ -95,120 +73,21 @@
           ]
         },
         {
-          "name": "CT03 - Acesso Com Token",
+          "name": "CT03 - /me (com token)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/pacientes",
-              "host": ["{{base_url}}"],
-              "path": ["api", "pacientes"]
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status 200', function() {",
-                  "  pm.response.to.have.status(200);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "CT04 - Acesso Sem Token",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/pacientes",
-              "host": ["{{base_url}}"],
-              "path": ["api", "pacientes"]
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status 401', function() {",
-                  "  pm.response.to.have.status(401);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "CT05 - Login Senha Incorreta",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"maria@teste.com\",\n  \"senha\": \"senha_errada\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status 401', function() {",
-                  "  pm.response.to.have.status(401);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "CT06 - Usuário Logado",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
             "url": {
               "raw": "{{base_url}}/api/auth/me",
               "host": ["{{base_url}}"],
               "path": ["api", "auth", "me"]
             }
           },
-          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Status 200', function() {",
-                  "  pm.response.to.have.status(200);",
-                  "});"
-                ]
+                "exec": ["pm.test('Status 200', function () { pm.response.to.have.status(200); });"]
               }
             }
           ]

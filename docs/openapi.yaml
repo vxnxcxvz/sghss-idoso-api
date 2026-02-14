@@ -1,197 +1,126 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  title: SGHSS API
-  description: Sistema de Gestão Hospitalar e de Serviços de Saúde
+  title: SGHSS VidaPlus API
   version: 1.0.0
-  contact:
-    name: Vinícius Pereira Carvalho
-    email: contato@sghss.com
-
+  description: API REST para Plataforma de Suporte ao Cuidado do Idoso (SGHSS VidaPlus).
 servers:
   - url: http://localhost:3000
-    description: Servidor de desenvolvimento
-
 tags:
-  - name: Autenticação
-    description: Endpoints de autenticação e autorização
+  - name: Auth
+    description: Autenticação e autorização (JWT)
   - name: Pacientes
-    description: Gestão de pacientes
-  - name: Consultas
-    description: Agendamento e gestão de consultas
-
+    description: CRUD de pacientes (RBAC + auditoria)
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-  
   schemas:
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        nome:
-          type: string
-        email:
-          type: string
-          format: email
-        tipo:
-          type: string
-          enum: [PACIENTE, MEDICO, ENFERMEIRO, ADMINISTRADOR]
-    
     Error:
       type: object
       properties:
-        erro:
+        error: { type: string }
+        message: { type: string }
+    Usuario:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        nome: { type: string, example: Maria Silva }
+        email: { type: string, format: email, example: maria@teste.com }
+        perfil:
           type: string
-        mensagem:
+          enum: [ADMIN, PROFISSIONAL, PACIENTE, CUIDADOR]
+          example: ADMIN
+        pacienteId: { type: integer, nullable: true, example: null }
+    RegisterRequest:
+      type: object
+      required: [nome, email, senha]
+      properties:
+        nome: { type: string }
+        email: { type: string, format: email }
+        senha: { type: string, minLength: 6 }
+        tipo:
           type: string
-
+          enum: [PACIENTE, MEDICO, ENFERMEIRO, ADMINISTRADOR]
+          default: ADMINISTRADOR
+        perfil:
+          type: string
+          enum: [ADMIN, PROFISSIONAL, PACIENTE, CUIDADOR]
+        pacienteId: { type: integer, nullable: true }
+    LoginRequest:
+      type: object
+      required: [email, senha]
+      properties:
+        email: { type: string, format: email }
+        senha: { type: string }
+    LoginResponse:
+      type: object
+      properties:
+        message: { type: string }
+        token: { type: string }
+        expiresIn: { type: string }
 paths:
   /api/auth/register:
     post:
-      tags:
-        - Autenticação
-      summary: Registrar novo usuário
+      tags: [Auth]
+      summary: Registrar usuário
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              required:
-                - nome
-                - email
-                - senha
-              properties:
-                nome:
-                  type: string
-                  example: Maria Silva
-                email:
-                  type: string
-                  format: email
-                  example: maria@teste.com
-                senha:
-                  type: string
-                  minLength: 6
-                  example: senha123
-                tipo:
-                  type: string
-                  enum: [PACIENTE, MEDICO, ENFERMEIRO, ADMINISTRADOR]
-                  default: PACIENTE
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
       responses:
         '201':
-          description: Usuário criado com sucesso
+          description: Usuário criado
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  mensagem:
-                    type: string
-                  usuario:
-                    $ref: '#/components/schemas/User'
-        '400':
-          description: Campos obrigatórios não preenchidos
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+                  message: { type: string }
+                  usuario: { $ref: '#/components/schemas/Usuario' }
         '409':
           description: Email já cadastrado
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  
+              schema: { $ref: '#/components/schemas/Error' }
   /api/auth/login:
     post:
-      tags:
-        - Autenticação
-      summary: Fazer login
+      tags: [Auth]
+      summary: Login (JWT)
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              required:
-                - email
-                - senha
-              properties:
-                email:
-                  type: string
-                  format: email
-                  example: maria@teste.com
-                senha:
-                  type: string
-                  example: senha123
+            schema: { $ref: '#/components/schemas/LoginRequest' }
       responses:
         '200':
-          description: Login realizado com sucesso
+          description: Login OK
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  mensagem:
-                    type: string
-                  token:
-                    type: string
-                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+              schema: { $ref: '#/components/schemas/LoginResponse' }
         '401':
           description: Credenciais inválidas
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  
+              schema: { $ref: '#/components/schemas/Error' }
   /api/auth/me:
     get:
-      tags:
-        - Autenticação
-      summary: Obter dados do usuário logado
-      security:
-        - bearerAuth: []
+      tags: [Auth]
+      summary: Retorna dados do usuário logado
+      security: [{ bearerAuth: [] }]
       responses:
         '200':
-          description: Dados do usuário
+          description: Usuário logado
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  usuario:
-                    $ref: '#/components/schemas/User'
+                  usuario: { $ref: '#/components/schemas/Usuario' }
         '401':
-          description: Token não fornecido
+          description: Token ausente/ inválido
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  
-  /api/pacientes:
-    get:
-      tags:
-        - Pacientes
-      summary: Listar pacientes
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Lista de pacientes
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-        '401':
-          description: Não autenticado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+              schema: { $ref: '#/components/schemas/Error' }
