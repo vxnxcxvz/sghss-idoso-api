@@ -2,14 +2,20 @@ openapi: 3.0.3
 info:
   title: SGHSS VidaPlus API
   version: 1.0.0
-  description: API REST do SGHSS VidaPlus (escopo entregue: Auth + Pacientes).
+  description: API REST para SGHSS VidaPlus. Esta documentação reflete as rotas implementadas
+    no código (ZIP do repositório).
 servers:
-  - url: http://localhost:3000
+- url: http://localhost:3000
+  description: Servidor local
 tags:
-  - name: Auth
-    description: Autenticação e autorização (JWT)
-  - name: Pacientes
-    description: Operações de pacientes (rotas protegidas por token)
+- name: Health
+- name: Auth
+- name: Pacientes
+- name: Consultas
+- name: Prontuários
+- name: Prescrições
+- name: Notificações
+- name: Relatórios
 components:
   securitySchemes:
     bearerAuth:
@@ -20,200 +26,891 @@ components:
     Error:
       type: object
       properties:
-        error: { type: string, example: "UNAUTHORIZED" }
-        message: { type: string, example: "Credenciais inválidas" }
-
+        error:
+          type: string
+        message:
+          type: string
     Usuario:
       type: object
       properties:
-        id: { type: integer, example: 1 }
-        nome: { type: string, example: "Admin Teste" }
-        email: { type: string, format: email, example: "admin@teste.com" }
+        id:
+          type: integer
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
         perfil:
           type: string
-          enum: [ADMIN, PROFISSIONAL, PACIENTE, CUIDADOR]
-          example: ADMIN
-        pacienteId: { type: integer, nullable: true, example: null }
-
-    RegisterRequest:
-      type: object
-      required: [nome, email, senha]
-      properties:
-        nome: { type: string, example: "Admin Teste" }
-        email: { type: string, format: email, example: "admin@teste.com" }
-        senha: { type: string, minLength: 6, example: "senha123" }
-        tipo:
-          type: string
-          enum: [PACIENTE, MEDICO, ENFERMEIRO, ADMINISTRADOR]
-          description: Compatibilidade (mapeia para perfil).
-          example: "ADMINISTRADOR"
-        perfil:
-          type: string
-          enum: [ADMIN, PROFISSIONAL, PACIENTE, CUIDADOR]
-          description: Perfil direto (se informado, tem prioridade).
-          example: "ADMIN"
+          enum:
+          - ADMIN
+          - PROFISSIONAL
+          - PACIENTE
+          - CUIDADOR
         pacienteId:
           type: integer
           nullable: true
-          example: null
-
-    LoginRequest:
+    AuthRegisterRequest:
       type: object
-      required: [email, senha]
+      required:
+      - nome
+      - email
+      - senha
       properties:
-        email: { type: string, format: email, example: "admin@teste.com" }
-        senha: { type: string, example: "senha123" }
-
-    LoginResponse:
+        nome:
+          type: string
+          minLength: 2
+          example: Dr. João Silva
+        email:
+          type: string
+          format: email
+          example: joao@vidaplus.com
+        senha:
+          type: string
+          minLength: 6
+          example: senha123
+        perfil:
+          type: string
+          enum:
+          - ADMIN
+          - PROFISSIONAL
+          - PACIENTE
+          - CUIDADOR
+          nullable: true
+        tipo:
+          type: string
+          enum:
+          - PACIENTE
+          - MEDICO
+          - ENFERMEIRO
+          - ADMINISTRADOR
+          nullable: true
+        pacienteId:
+          type: integer
+          nullable: true
+    AuthRegisterResponse:
       type: object
       properties:
-        message: { type: string, example: "Login realizado com sucesso" }
-        token: { type: string, example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
-        expiresIn: { type: string, example: "1h" }
-
+        message:
+          type: string
+          example: Usuário criado com sucesso
+        usuario:
+          $ref: '#/components/schemas/Usuario'
+    AuthLoginRequest:
+      type: object
+      required:
+      - email
+      - senha
+      properties:
+        email:
+          type: string
+          format: email
+          example: joao@vidaplus.com
+        senha:
+          type: string
+          example: senha123
+    AuthLoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Login realizado com sucesso
+        token:
+          type: string
+        expiresIn:
+          type: string
+          example: 1h
     Paciente:
       type: object
       properties:
-        id: { type: integer, example: 1 }
-        nome: { type: string, example: "Maria Santos" }
-        cpf: { type: string, example: "12345678900" }
-        dataNascimento: { type: string, example: "1945-03-15" }
-        telefone: { type: string, nullable: true, example: "(11) 98765-4321" }
-        endereco: { type: string, nullable: true, example: "Rua das Flores, 123" }
-        contatoEmergencia: { type: string, nullable: true, example: "(11) 91234-5678" }
-
-    CreatePacienteRequest:
+        id:
+          type: integer
+        nome:
+          type: string
+        cpf:
+          type: string
+        dataNascimento:
+          type: string
+          format: date-time
+        telefone:
+          type: string
+          nullable: true
+        endereco:
+          type: string
+          nullable: true
+        contatoEmergencia:
+          type: string
+          nullable: true
+    PacienteCreateRequest:
       type: object
-      required: [nome, cpf, dataNascimento]
+      required:
+      - nome
+      - cpf
+      - dataNascimento
       properties:
-        nome: { type: string, example: "Maria Santos" }
-        cpf: { type: string, example: "12345678900" }
-        dataNascimento: { type: string, example: "1945-03-15" }
-        telefone: { type: string, example: "(11) 98765-4321" }
-        endereco: { type: string, example: "Rua das Flores, 123" }
-        contatoEmergencia: { type: string, example: "(11) 91234-5678" }
-
+        nome:
+          type: string
+          example: Maria Santos
+        cpf:
+          type: string
+          example: '12345678900'
+        dataNascimento:
+          type: string
+          example: '1945-03-15'
+        telefone:
+          type: string
+          nullable: true
+        endereco:
+          type: string
+          nullable: true
+        contatoEmergencia:
+          type: string
+          nullable: true
+    PacienteUpdateRequest:
+      type: object
+      properties:
+        nome:
+          type: string
+        telefone:
+          type: string
+        endereco:
+          type: string
+        contatoEmergencia:
+          type: string
+    PacienteListResponse:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 1
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Paciente'
+    VinculoCuidador:
+      type: object
+      properties:
+        pacienteId:
+          type: integer
+        cuidadorUserId:
+          type: integer
+        grau:
+          type: string
+          nullable: true
+    VinculoRequest:
+      type: object
+      required:
+      - cuidadorUserId
+      properties:
+        cuidadorUserId:
+          type: integer
+          example: 5
+        grau:
+          type: string
+          nullable: true
+          example: Filho
+    Consulta:
+      type: object
+      properties:
+        id:
+          type: integer
+        pacienteId:
+          type: integer
+        profissionalId:
+          type: integer
+        dataHora:
+          type: string
+          format: date-time
+        status:
+          type: string
+        motivo:
+          type: string
+          nullable: true
+        motivoCancelamento:
+          type: string
+          nullable: true
+    ConsultaCreateRequest:
+      type: object
+      required:
+      - pacienteId
+      - profissionalId
+      - dataHora
+      properties:
+        pacienteId:
+          type: integer
+        profissionalId:
+          type: integer
+        dataHora:
+          type: string
+          format: date-time
+          example: '2025-02-20T14:00:00Z'
+        motivo:
+          type: string
+          nullable: true
+    ConsultaCancelRequest:
+      type: object
+      required:
+      - motivoCancelamento
+      properties:
+        motivoCancelamento:
+          type: string
+          example: Paciente não compareceu
+    Prontuario:
+      type: object
+      properties:
+        id:
+          type: integer
+        consultaId:
+          type: integer
+        evolucao:
+          type: string
+        sinaisVitais:
+          type: string
+          nullable: true
+        criadoEm:
+          type: string
+          format: date-time
+    ProntuarioCreateRequest:
+      type: object
+      required:
+      - consultaId
+      - evolucao
+      properties:
+        consultaId:
+          type: integer
+        evolucao:
+          type: string
+          example: Paciente apresenta melhora...
+        sinaisVitais:
+          type: string
+          nullable: true
+          example: 'PA: 120/80, FC: 72bpm'
+    Prescricao:
+      type: object
+      properties:
+        id:
+          type: integer
+        prontuarioId:
+          type: integer
+        medicamento:
+          type: string
+        posologia:
+          type: string
+        duracaoDias:
+          type: integer
+          nullable: true
+        observacoes:
+          type: string
+          nullable: true
+        criadoEm:
+          type: string
+          format: date-time
+    PrescricaoCreateRequest:
+      type: object
+      required:
+      - prontuarioId
+      - medicamento
+      - posologia
+      properties:
+        prontuarioId:
+          type: integer
+        medicamento:
+          type: string
+          example: Losartana 50mg
+        posologia:
+          type: string
+          example: 1 comprimido pela manhã
+        duracaoDias:
+          type: integer
+          nullable: true
+          example: 30
+        observacoes:
+          type: string
+          nullable: true
+    Notificacao:
+      type: object
+      properties:
+        id:
+          type: integer
+        pacienteId:
+          type: integer
+        tipo:
+          type: string
+        mensagem:
+          type: string
+        canal:
+          type: string
+        criadoEm:
+          type: string
+          format: date-time
+    NotificacaoCreateRequest:
+      type: object
+      required:
+      - pacienteId
+      - tipo
+      - mensagem
+      - canal
+      properties:
+        pacienteId:
+          type: integer
+        tipo:
+          type: string
+          enum:
+          - LEMBRETE
+          - ORIENTACAO
+        mensagem:
+          type: string
+          example: 'Lembrete: Consulta amanhã às 14h'
+        canal:
+          type: string
+          enum:
+          - APP
+          - SMS
+          - EMAIL
+    RelatorioConsultas:
+      type: object
+      properties:
+        total:
+          type: integer
+        agendadas:
+          type: integer
+        realizadas:
+          type: integer
+        canceladas:
+          type: integer
 paths:
   /health:
     get:
+      tags:
+      - Health
       summary: Health check
       responses:
         '200':
-          description: OK
+          description: API funcionando
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  status: { type: string, example: "ok" }
-
-  /api/auth/register:
+                  status:
+                    type: string
+                    example: ok
+  /auth/signup:
     post:
-      tags: [Auth]
-      summary: Registrar usuário
+      tags:
+      - Auth
+      summary: Cadastrar novo usuário
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/RegisterRequest' }
+            schema:
+              $ref: '#/components/schemas/AuthRegisterRequest'
       responses:
         '201':
           description: Usuário criado
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message: { type: string }
-                  usuario: { $ref: '#/components/schemas/Usuario' }
+                $ref: '#/components/schemas/AuthRegisterResponse'
         '409':
           description: Email já cadastrado
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Error' }
-
-  /api/auth/login:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/register:
     post:
-      tags: [Auth]
-      summary: Login (JWT)
+      tags:
+      - Auth
+      summary: Cadastrar novo usuário
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/LoginRequest' }
+            schema:
+              $ref: '#/components/schemas/AuthRegisterRequest'
+      responses:
+        '201':
+          description: Usuário criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthRegisterResponse'
+        '409':
+          description: Email já cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/login:
+    post:
+      tags:
+      - Auth
+      summary: Realizar login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
       responses:
         '200':
           description: Login OK
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/LoginResponse' }
+              schema:
+                $ref: '#/components/schemas/AuthLoginResponse'
         '401':
           description: Credenciais inválidas
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Error' }
-
-  /api/auth/me:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/me:
     get:
-      tags: [Auth]
-      summary: Dados do usuário logado
-      security: [{ bearerAuth: [] }]
+      tags:
+      - Auth
+      summary: Obter dados do usuário autenticado
+      security:
+      - bearerAuth: []
       responses:
         '200':
-          description: Usuário logado
+          description: Dados do usuário
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  usuario: { $ref: '#/components/schemas/Usuario' }
-        '401':
-          description: Token ausente/ inválido
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Error' }
-
-  /api/pacientes:
-    get:
-      tags: [Pacientes]
-      summary: Listar pacientes (rota protegida)
-      security: [{ bearerAuth: [] }]
-      responses:
-        '200':
-          description: Lista de pacientes
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/Paciente' }
+                  usuario:
+                    $ref: '#/components/schemas/Usuario'
         '401':
           description: Não autenticado
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Error' }
-
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /pacientes:
+    get:
+      tags:
+      - Pacientes
+      summary: Listar pacientes (paginado)
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          default: 1
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 20
+      - name: q
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Lista paginada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PacienteListResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Sem permissão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     post:
-      tags: [Pacientes]
-      summary: Criar paciente (rota protegida)
-      security: [{ bearerAuth: [] }]
+      tags:
+      - Pacientes
+      summary: Cadastrar paciente
+      security:
+      - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreatePacienteRequest' }
+            schema:
+              $ref: '#/components/schemas/PacienteCreateRequest'
       responses:
         '201':
           description: Paciente criado
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Paciente' }
+              schema:
+                $ref: '#/components/schemas/Paciente'
+        '409':
+          description: CPF já cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '400':
           description: Dados inválidos
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Error' }
-        '401':
-          description: Não autenticado
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Sem permissão
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Error' }
+              schema:
+                $ref: '#/components/schemas/Error'
+  /pacientes/{id}:
+    get:
+      tags:
+      - Pacientes
+      summary: Buscar paciente por ID
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Paciente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Paciente'
+        '403':
+          description: Sem permissão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+      - Pacientes
+      summary: Atualizar paciente
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PacienteUpdateRequest'
+      responses:
+        '200':
+          description: Paciente atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Paciente'
+        '404':
+          description: Não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+      - Pacientes
+      summary: Remover paciente
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: Removido
+        '404':
+          description: Não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /pacientes/{id}/vinculos:
+    post:
+      tags:
+      - Pacientes
+      summary: Vincular cuidador ao paciente
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VinculoRequest'
+      responses:
+        '201':
+          description: Vínculo criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VinculoCuidador'
+        '409':
+          description: Vínculo já existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /consultas:
+    get:
+      tags:
+      - Consultas
+      summary: Listar consultas
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de consultas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Consulta'
+    post:
+      tags:
+      - Consultas
+      summary: Agendar consulta
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultaCreateRequest'
+      responses:
+        '201':
+          description: Consulta criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Consulta'
+  /consultas/{id}/cancelar:
+    patch:
+      tags:
+      - Consultas
+      summary: Cancelar consulta
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultaCancelRequest'
+      responses:
+        '200':
+          description: Consulta cancelada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Consulta'
+  /prontuarios:
+    post:
+      tags:
+      - Prontuários
+      summary: Criar prontuário
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProntuarioCreateRequest'
+      responses:
+        '201':
+          description: Prontuário criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prontuario'
+  /prontuarios/paciente/{pacienteId}:
+    get:
+      tags:
+      - Prontuários
+      summary: Listar prontuários por paciente
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: pacienteId
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Lista
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Prontuario'
+  /prescricoes:
+    post:
+      tags:
+      - Prescrições
+      summary: Criar prescrição
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrescricaoCreateRequest'
+      responses:
+        '201':
+          description: Prescrição criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescricao'
+  /prescricoes/paciente/{pacienteId}:
+    get:
+      tags:
+      - Prescrições
+      summary: Listar prescrições por paciente
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: pacienteId
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Lista
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Prescricao'
+  /notificacoes:
+    post:
+      tags:
+      - Notificações
+      summary: Criar notificação
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificacaoCreateRequest'
+      responses:
+        '201':
+          description: Notificação criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notificacao'
+  /notificacoes/paciente/{pacienteId}:
+    get:
+      tags:
+      - Notificações
+      summary: Listar notificações por paciente
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: pacienteId
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Lista
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notificacao'
+  /relatorios/consultas:
+    get:
+      tags:
+      - Relatórios
+      summary: Relatório de consultas
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: dataInicio
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: dataFim
+        in: query
+        schema:
+          type: string
+          format: date
+      responses:
+        '200':
+          description: Relatório
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelatorioConsultas'
