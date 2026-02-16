@@ -427,6 +427,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /auth/register:
     post:
+      deprecated: true
       tags:
       - Auth
       summary: Cadastrar novo usuário
