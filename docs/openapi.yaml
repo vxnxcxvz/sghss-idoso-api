@@ -376,14 +376,21 @@ components:
     RelatorioConsultas:
       type: object
       properties:
+        periodo:
+          type: object
+          properties:
+            inicio:
+              type: string
+              nullable: true
+            fim:
+              type: string
+              nullable: true
         total:
           type: integer
-        agendadas:
-          type: integer
-        realizadas:
-          type: integer
-        canceladas:
-          type: integer
+        porStatus:
+          type: object
+          additionalProperties:
+            type: integer
 paths:
   /health:
     get:
@@ -898,12 +905,12 @@ paths:
       security:
       - bearerAuth: []
       parameters:
-      - name: dataInicio
+      - name: inicio
         in: query
         schema:
           type: string
           format: date
-      - name: dataFim
+      - name: fim
         in: query
         schema:
           type: string
