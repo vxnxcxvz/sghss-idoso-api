@@ -345,19 +345,25 @@ echo "✅ Servidor parado"
 ###########################################
 
 echo ""
-echo "📦 Commitando evidências..."
+echo "📦 Gerando evidências de teste..."
+## Definir valor padrão para PUSH_EVIDENCES para evitar falhas com set -u
+PUSH_EVIDENCES="${PUSH_EVIDENCES:-false}"
+if [ "$PUSH_EVIDENCES" = "true" ]; then
+  echo "PUSH_EVIDENCES=true: adicionando e versionando evidências."
 
-git add docs/evidencias/ docs/RELATORIO-TESTES.md
+  git add docs/evidencias/ docs/RELATORIO-TESTES.md
 
-git commit -m "test: adicionar evidências reais de testes automatizados
+  git commit -m "test: adicionar evidências reais de testes automatizados" \
+    -m "7 testes de API executados" \
+    -m "Evidências reais (headers + body)" \
+    -m "Logs completos do servidor" \
+    -m "Relatório detalhado de execução" \
+    -m "Validação de autenticação e segurança (401 sem token)" || true
 
-- 7 testes de API executados
-- Evidências reais (headers + body)
-- Logs completos do servidor
-- Relatório detalhado de execução
-- Validação de autenticação e segurança (401 sem token)" || true
-
-git push || true
+  git push || true
+else
+  echo "Evidências geradas em docs/evidencias/ e docs/RELATORIO-TESTES.md (não versionadas)"
+fi
 
 echo ""
 echo "=========================================="
