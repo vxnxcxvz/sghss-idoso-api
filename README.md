@@ -20,15 +20,21 @@ URLs
 
 Health: GET http://localhost:3000/health
 
-Swagger UI: http://localhost:3000/docs
+Swagger UI: /docs
 
 Auth
 
-POST /api/auth/register
+POST /auth/signup
 
-POST /api/auth/login
+POST /auth/login
 
-GET /api/auth/me
+GET /auth/me
+
+POST /auth/register — alias por compatibilidade (deprecated no OpenAPI).
+
+Aliases
+
+/api/auth/* é alias de /auth/* e /api/pacientes/* é alias de /pacientes/*
 
 Documentos
 
